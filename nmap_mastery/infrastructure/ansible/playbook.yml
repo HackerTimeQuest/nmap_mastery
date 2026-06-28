@@ -1,0 +1,125 @@
+---
+- name: Provision Nmap Mastery target
+  hosts: all
+  become: true
+  vars:
+    target_ip: "10.0.2.5"
+
+  tasks:
+    - name: Install target services
+      apt:
+        name:
+          - openssh-server
+          - apache2
+          - mysql-server
+          - python3
+          - netcat-openbsd
+          - ufw
+        state: present
+        update_cache: yes
+
+    - name: Configure SSH
+      lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+        - { regexp: "^PasswordAuthentication", line: "PasswordAuthentication yes" }
+        - { regexp: "^PermitRootLogin",      line: "PermitRootLogin yes" }
+      notify: restart sshd
+
+    - name: Set root password
+      shell: "echo 'root:toor' | chpasswd"
+
+    - name: Create admin user for brute-force exercise
+      user:
+        name: admin
+        shell: /bin/bash
+
+    - name: Set admin password
+      shell: "echo 'admin:Sup3rS3cret!' | chpasswd"
+
+    - name: Deploy Apache index page
+      copy:
+        content: |
+          <html><body><h1>Nmap Mastery Target</h1>
+          <p>Flag: HT/apache2-webserv3r</p></body></html>
+        dest: /var/www/html/index.html
+
+    - name: Configure Apache to expose version
+      lineinfile:
+        path: /etc/apache2/conf-available/security.conf
+        line: "{{ item }}"
+      loop:
+        - "ServerTokens Full"
+        - "ServerSignature On"
+
+    - name: Create banner service script
+      copy:
+        dest: /usr/local/bin/banner_service.py
+        content: |
+          import socket, time
+          s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+          s.bind(("0.0.0.0", 2222))
+          s.listen(5)
+          while True:
+              conn, addr = s.accept()
+              conn.send(b"Hacking Time... C4tch-m3-1f-you-c4n\n")
+              time.sleep(0.5)
+              conn.close()
+        mode: '0755'
+
+    - name: Create hidden service script
+      copy:
+        dest: /usr/local/bin/hidden_service.py
+        content: |
+          import socket, time
+          s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+          s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+          s.bind(("0.0.0.0", 9090))
+          s.listen(5)
+          while True:
+              conn, addr = s.accept()
+              conn.send(b"Secret lab console -- HT/fr4gm3nt3d-v1ct0ry\n")
+              time.sleep(0.5)
+              conn.close()
+        mode: '0755'
+
+    - name: Configure UFW (simulated firewall)
+      shell: |
+        ufw default deny incoming
+        ufw allow 22/tcp
+        ufw allow 80/tcp
+        ufw allow 3306/tcp
+        ufw allow 3307/tcp
+        ufw allow 2222/tcp
+        ufw allow 53/udp
+        ufw allow 161/udp
+        ufw allow 8080/tcp
+        ufw allow 5432/tcp
+
+    - name: Create flag directory
+      file:
+        path: /lab/flags
+        state: directory
+
+    - name: Create wordlists for brute-force
+      copy:
+        dest: "{{ item.dest }}"
+        content: "{{ item.content }}"
+      loop:
+        - dest: /lab/wordlists/ssh_users.txt
+          content: "admin\nroot\nuser\ntest\n"
+        - dest: /lab/wordlists/ssh_passwords.txt
+          content: "Sup3rS3cret!\npassword123\nadmin123\ntoor\nqwerty\n"
+
+  handlers:
+    - name: restart sshd
+      service:
+        name: ssh
+        state: restarted
+    - name: restart apache2
+      service:
+        name: apache2
+        state: restarted

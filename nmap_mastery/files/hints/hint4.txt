@@ -1,0 +1,12 @@
+Hint: The -A flag is "everything on":
+  - Version detection
+  - OS detection
+  - Default scripts
+  - Traceroute
+
+Critically, it also scans ALL 65535 ports — not just the top 1000.
+This is why it takes longer, but reveals hidden services.
+
+  sudo nmap -A 10.0.2.5
+
+Look for the MySQL port (3306) and its version string.

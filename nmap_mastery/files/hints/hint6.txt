@@ -1,0 +1,20 @@
+Hint: Port 2222 runs a custom service. The default NSE scripts
+won't know how to grab its banner. Try two approaches:
+
+Approach A — nc as a quick test:
+  nc 10.0.2.5 2222
+
+If you get the banner text, now write an NSE script to automate it:
+
+Approach B — Custom NSE script:
+
+  nmap --script ./banner-grab.nse -p 2222 10.0.2.5
+
+Study nmap's scripting API:
+  https://nmap.org/book/nse-advanced.html
+
+Your script needs:
+  - portrule: trigger on any port
+  - action: create socket, connect, receive, return banner
+
+The flag is inside the banner text, prefixed with HT/...

@@ -1,0 +1,17 @@
+Hint: The firewall on the target drops packets destined for ports
+above 1000. Two evasion techniques work here:
+
+Fragmentation (-f) splits each IP packet into tiny fragments.
+Simple firewalls that only inspect complete packets will let them through.
+
+  sudo nmap -f -p 9090 10.0.2.5
+
+Decoys (-D) inject fake source IPs into the scan. The target
+sees connections from random IPs, hiding you in the noise.
+
+  sudo nmap -D RND:10 -p 9090 10.0.2.5
+
+Combine them:
+  sudo nmap -f -D RND:10 -p 9090 10.0.2.5
+
+When port 9090 shows as open, connect with nc to grab the flag.

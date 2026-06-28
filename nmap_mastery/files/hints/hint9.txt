@@ -1,0 +1,22 @@
+Hint: Nmap's XML output preserves everything — including the
+exact command line used to generate the scan.
+
+Decompress the evidence file:
+  zcat files/evidence/scan_log.xml.gz
+
+Look at the first few lines. The <nmaprun> tag has an "args"
+attribute with the full original command:
+
+  args="nmap -sS -sV -O -T4 --top-ports 10000 10.0.2.5"
+
+Translate the flags to the flag format:
+  -sS → s-s
+  -sV → s-V
+  -O → O
+  -T4 → T4
+  --top-ports 10000 → 10000
+
+The flag is: HT/s-s-V-O-T4-10000
+
+Side-note: Real attackers forget to sanitize their scan logs.
+This is how they get caught.

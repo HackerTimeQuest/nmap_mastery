@@ -1,0 +1,8 @@
+Hint: The -sV flag enables service version detection.
+nmap sends probes to the open port and matches responses
+against its database of known service signatures.
+
+  nmap -sV -p 80 10.0.2.5
+
+Check the "VERSION" or "product+version" column in the output.
+The flag format is: HT/<product>-<version>

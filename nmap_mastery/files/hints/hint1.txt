@@ -1,0 +1,7 @@
+Hint: Use nmap's -sS flag for a SYN scan (stealth scan).
+Combine with --top-ports 1000 to scan the most common ports.
+
+  nmap -sS --top-ports 1000 10.0.2.5
+
+Look for the port running an HTTP service (usually 80).
+Then visit it in a browser: http://10.0.2.5

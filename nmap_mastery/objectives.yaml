@@ -1,0 +1,138 @@
+---
+# objectives.yaml — HackerTime lab objectives
+# Each objective defines the challenge, flag pattern, and validation method.
+# Flags are stored in /lab/flags/<name>.txt inside the target container.
+
+objectives:
+  # ── BEGINNER ─────────────────────────────────────
+  - id: obj_01
+    difficulty: beginner
+    title: "Find the Web Server"
+    description: >
+      Perform a basic scan of the 1000 most common TCP ports.
+      Submit the flag found on the HTTP service.
+    hint_file: hint1.txt
+    expected_command: "nmap -sS --top-ports 1000 <target>"
+    flag: "HT/apache2-webserv3r"
+    validation:
+      method: file_exists
+      path: /lab/flags/obj_01.txt
+      pattern: "^HT\\/[a-z0-9]+\\$"
+
+  - id: obj_02
+    difficulty: beginner
+    title: "Identify the Server"
+    description: >
+      Enable version detection and report the exact web server
+      software and version running on port 80.
+    hint_file: hint2.txt
+    expected_command: "nmap -sV -p 80 <target>"
+    flag: "HT/Apache-2.4.58"
+    validation:
+      method: flag_content
+      expected: "HT/Apache-2.4.58"
+
+  - id: obj_03
+    difficulty: beginner
+    title: "Fingerprint the OS"
+    description: >
+      Use OS detection to determine the target's operating system.
+      What distribution is running?
+    hint_file: hint3.txt
+    expected_command: "nmap -O <target>"
+    flag: "HT/Ubuntu-22.04"
+    validation:
+      method: flag_content
+      expected: "HT/Ubuntu-22.04"
+
+  # ── INTERMEDIATE ─────────────────────────────────
+  - id: obj_04
+    difficulty: intermediate
+    title: "Reveal the Hidden Ports"
+    description: >
+      An aggressive scan will uncover additional open ports.
+      What MySQL server version is running?
+    hint_file: hint4.txt
+    expected_command: "nmap -A <target>"
+    flag: "HT/MySQL-8.0.35"
+    validation:
+      method: flag_content
+      expected: "HT/MySQL-8.0.35"
+
+  - id: obj_05
+    difficulty: intermediate
+    title: "Brute-Force SSH"
+    description: >
+      Use the NSE brute script against SSH with the provided wordlist
+      (files/wordlists/ssh_passwords.txt). Find the valid credential pair.
+    hint_file: hint5.txt
+    expected_command: >
+      nmap --script ssh-brute --script-args userdb=users.txt,passdb=ssh_passwords.txt -p 22 <target>
+    flag: "HT/admin:Sup3rS3cret!"
+    validation:
+      method: flag_content
+      expected: "HT/admin:Sup3rS3cret!"
+
+  - id: obj_06
+    difficulty: intermediate
+    title: "Custom NSE Script"
+    description: >
+      A service on port 2222 hides a custom banner. Write or adapt an NSE
+      script to connect via TCP and grab the banner text.
+    hint_file: hint6.txt
+    expected_command: >
+      nmap --script banner-grab.nse -p 2222 <target>
+    flag: "HT/C4tch-m3-1f-you-c4n"
+    validation:
+      method: flag_content
+      expected: "HT/C4tch-m3-1f-you-c4n"
+
+  # ── ADVANCED ─────────────────────────────────────
+  - id: obj_07
+    difficulty: advanced
+    title: "UDP Port Discover"
+    description: >
+      TCP-only scans miss some services. Scan UDP ports 53 and 161 to find
+      the hidden DNS and SNMP services. What's the flag on DNS?
+    hint_file: hint7.txt
+    expected_command: "nmap -sU -p 53,161 --top-udp-ports 100 <target>"
+    flag: "HT/UDP-n0t-f0rg0tt3n"
+    validation:
+      method: flag_content
+      expected: "HT/UDP-n0t-f0rg0tt3n"
+
+  - id: obj_08
+    difficulty: advanced
+    title: "Bypass the Firewall"
+    description: >
+      A basic firewall blocks direct scans above port 1000.
+      Use fragmented or decoy packets to map port 9090.
+    hint_file: hint8.txt
+    expected_command: >
+      nmap -f -D RND:10 -p 9090 <target>
+    flag: "HT/fr4gm3nt3d-v1ct0ry"
+    validation:
+      method: flag_content
+      expected: "HT/fr4gm3nt3d-v1ct0ry"
+
+  - id: obj_09
+    difficulty: advanced
+    title: "Scan Log Forensics"
+    description: >
+      Analyze the provided nmap XML scan log (files/evidence/scan_log.xml.gz).
+      Reconstruct the attacker's full command line from the XML metadata.
+    hint_file: hint9.txt
+    expected_command: "zcat scan_log.xml.gz | nmap_parse.sh"
+    flag: "HT/s-s-V-O-T4-10000"
+    validation:
+      method: flag_content
+      expected: "HT/s-s-V-O-T4-10000"
+
+# ── VALIDATION CONFIG ─────────────────────────────
+scoring:
+  mode: sequential       # must complete in order
+  partial_credit: true    # any completed objective earns credit
+  bonus:
+    - id: speed_run
+      condition: "all_objectives_under_60m"
+      flag: "HT/sp33d-d3m0-god"

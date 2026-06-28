@@ -1,0 +1,11 @@
+Hint: The -O flag enables OS detection.
+nmap sends specially crafted TCP/IP packets and analyzes
+how the target stack responds (TTL, window size, etc.).
+
+  nmap -O 10.0.2.5
+
+For more aggressive detection, use:
+  nmap --osscan-guess -O 10.0.2.5
+
+Read the "OS details" line and note the distribution.
+The flag format is: HT/<OS>-<version>  e.g. HT/Ubuntu-22.04

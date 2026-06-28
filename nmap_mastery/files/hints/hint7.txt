@@ -1,0 +1,13 @@
+Hint: UDP services are INVISIBLE to TCP scans. Use -sU:
+
+  sudo nmap -sU -p 53,161 10.0.2.5
+
+UDP scanning is slow by default — nmap sends fewer probes.
+Speed it up:
+  sudo nmap -sU -T4 --max-retries 2 -p 53 10.0.2.5
+
+Once you see port 53 is open, extract the flag by connecting
+with nmap's DNS scripts:
+  sudo nmap -sU -sV --script dns* -p 53 10.0.2.5
+
+Or just use nc -u to query the DNS service directly.

