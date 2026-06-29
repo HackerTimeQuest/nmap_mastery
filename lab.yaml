@@ -1,17 +1,18 @@
 ---
-title: "Nmap Mastery"
+name: Nmap Mastery
+slug: nmap_mastery
 version: "1.0.0"
 author: "HackerTime"
+created: 2026-06-27
+updated: 2026-06-27
 tags:
   - network-reconnaissance
   - nmap
   - port-scanning
   - enumeration
   - post-exploitation
-difficulty: progressive
-  - beginner
-  - intermediate
-  - advanced
+difficulty: intermediate
+category: network-recon
 description: >
   Scan a multi-service target with nmap. Discover hidden ports, identify
   services, enumerate with NSE scripts, and evade basic firewall rules.
@@ -22,14 +23,10 @@ target:
   ports: [22, 53, 80, 3306, 5432, 8080, 9090, 2222]
   protocols: [tcp, udp]
 prerequisites:
-  tools:
-    - nmap >= 7.92
-  permissions:
-    - root (privileged scans for UDP/evasion)
-  knowledge:
-    - basic Linux networking
-    - TCP/IP fundamentals
-estimated_time: "2–4 hours"
+  - basic Linux networking
+  - TCP/IP fundamentals
+estimated_time: 120
+coast_per_minute: 0.001
 environment:
   type: container
   engine: docker
