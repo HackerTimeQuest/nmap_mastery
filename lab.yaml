@@ -31,3 +31,9 @@ environment:
   type: container
   engine: docker
 depends_on: []
+provisioning:
+  strategy: terraform
+  template_path: infrastructure/terraform
+  ttl_minutes: 120
+  vm_size: Standard_B2s
+  ports: [22, 53, 80, 161, 3306, 5432, 8080, 2222, 9090]

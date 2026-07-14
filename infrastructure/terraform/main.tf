@@ -17,9 +17,9 @@ variable "azure_region" {
   type        = string
 }
 
-variable "instance_type" {
+variable "vm_size" {
   description = "Azure VM size for the lab target"
-  default     = "Standard_B1s"
+  default     = "Standard_B2s"
   type        = string
 }
 
@@ -115,7 +115,7 @@ resource "azurerm_linux_virtual_machine" "target" {
   name                            = "nmap-mastery-target"
   resource_group_name             = azurerm_resource_group.lab.name
   location                        = azurerm_resource_group.lab.location
-  size                            = var.instance_type
+  size                            = var.vm_size
   admin_username                  = var.admin_username
   admin_password                  = var.admin_password
   disable_password_authentication = false
@@ -134,7 +134,7 @@ resource "azurerm_linux_virtual_machine" "target" {
     version   = "latest"
   }
 
-  custom_data = base64encode(file("${path.module}/../cloud-init/99-ansible.sh"))
+  custom_data = base64encode(file("${path.module}/../cloud-init/nmap-mastery.yaml"))
 
   tags = {
     Name        = "nmap-mastery-target"
@@ -143,12 +143,12 @@ resource "azurerm_linux_virtual_machine" "target" {
   }
 }
 
-output "target_private_ip" {
+output "private_ip_address" {
   value       = azurerm_linux_virtual_machine.target.private_ip_address
   description = "Private IP address of the target server"
 }
 
-output "target_public_ip" {
+output "public_ip_address" {
   value       = azurerm_public_ip.target.ip_address
   description = "Public IP address of the target server"
 }

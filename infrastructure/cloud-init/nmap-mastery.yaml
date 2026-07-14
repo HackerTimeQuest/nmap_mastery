@@ -1,0 +1,137 @@
+#cloud-config
+
+hostname: nmap-target
+timezone: UTC
+
+package_update: true
+packages:
+  - openssh-server
+  - apache2
+  - mysql-server
+  - python3
+  - netcat-openbsd
+  - dnsutils
+  - curl
+  - iproute2
+  - ufw
+  - gzip
+
+write_files:
+  - path: /var/www/html/index.html
+    owner: www-data:www-data
+    permissions: '0644'
+    content: |
+      <html><body><h1>Nmap Mastery Target</h1>
+      <p>Flag: HT/apache2-webserv3r</p></body></html>
+
+  - path: /usr/local/bin/banner_service.py
+    owner: root:root
+    permissions: '0755'
+    content: |
+      import socket
+      import time
+      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+      s.bind(("0.0.0.0", 2222))
+      s.listen(5)
+      while True:
+          conn, addr = s.accept()
+          conn.send(b"Hacking Time... C4tch-m3-1f-you-c4n\n")
+          time.sleep(0.5)
+          conn.close()
+
+  - path: /usr/local/bin/hidden_service.py
+    owner: root:root
+    permissions: '0755'
+    content: |
+      import socket
+      import time
+      s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+      s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+      s.bind(("0.0.0.0", 9090))
+      s.listen(5)
+      while True:
+          conn, addr = s.accept()
+          conn.send(b"Secret lab console -- HT/fr4gm3nt3d-v1ct0ry\n")
+          time.sleep(0.5)
+          conn.close()
+
+  - path: /lab/wordlists/ssh_users.txt
+    owner: root:root
+    permissions: '0644'
+    content: |
+      admin
+      root
+      user
+      test
+
+  - path: /lab/wordlists/ssh_passwords.txt
+    owner: root:root
+    permissions: '0644'
+    content: |
+      Sup3rS3cret!
+      password123
+      admin123
+      toor
+      qwerty
+
+  - path: /tmp/scan_log.xml
+    owner: root:root
+    permissions: '0644'
+    content: |
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE nmaprun>
+      <nmaprun scanner="nmap" args="nmap -sS -sV -O -T4 --top-ports 10000 10.0.2.5"
+              start="1715400600" startstr="Mon May 12 2024" version="7.94"
+              xmloutputversion="1.05">
+        <host>
+          <status state="up" reason="syn-ack"/>
+          <address addr="10.0.2.5" addr_type="ipv4"/>
+          <ports>
+            <port protocol="tcp" portid="22">
+              <state state="open"/>
+              <service name="ssh" product="OpenSSH" version="8.9p1"/>
+            </port>
+            <port protocol="tcp" portid="80">
+              <state state="open"/>
+              <service name="http" product="Apache" version="2.4.58"/>
+            </port>
+          </ports>
+          <os><osmatch name="Ubuntu 22.04" accuracy="92"/></os>
+        </host>
+      </nmaprun>
+
+runcmd:
+  - sed -i 's/^#PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+  - sed -i 's/^PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+  - echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+  - echo 'root:toor' | chpasswd
+  - useradd -m -s /bin/bash admin
+  - echo 'admin:Sup3rS3cret!' | chpasswd
+  - service ssh restart
+  - sed -i 's/ServerTokens.*/ServerTokens Full/' /etc/apache2/conf-available/security.conf
+  - sed -i 's/ServerSignature.*/ServerSignature On/' /etc/apache2/conf-available/security.conf
+  - a2enconf security || true
+  - service apache2 restart
+  - service mysql start
+  - mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'toor'; FLUSH PRIVILEGES;" 2>/dev/null || true
+  - mkdir -p /lab/flags /lab/evidence
+  - echo "HT/UDP-n0t-f0rg0tt3n" > /lab/flags/obj_07.txt
+  - gzip -c /tmp/scan_log.xml > /lab/evidence/scan_log.xml.gz || true
+  - rm -f /tmp/scan_log.xml
+  - ufw --force enable
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 53/udp
+  - ufw allow 161/udp
+  - ufw allow 3306/tcp
+  - ufw allow 8080/tcp
+  - ufw allow 5432/tcp
+  - ufw allow 2222/tcp
+  - python3 /usr/local/bin/banner_service.py &
+  - python3 /usr/local/bin/hidden_service.py &
+  - touch /opt/.lab-provisioned
+
+ssh_pwauth: true
